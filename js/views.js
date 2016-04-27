@@ -1,35 +1,9 @@
-window.Cooler = {  // top level namespace is declared on the window
-  Models: {},
-  Collections: {},
-  Views: {}
-};
-
-// Beer Model
-Cooler.Models.Beer = Backbone.Model.extend({
-  defaults: {
-    id: 1,
-    name: 'PBR',
-    likes: 0
-  },
-  validate: function(attrs, options){
-    if (!attrs.name){
-      alert('Your beer must have a name!');
-    }
-    if (attrs.name.length < 2){
-      alert('Your beer\'s name must have more than one letter!');
-    }
-  },
-  liked: function(){
-    alert('You\'ve liked ' + this.get('name'));
-  }
-});
-
 // Beer View
 Cooler.Views.Beer = Backbone.View.extend({
   tagName: 'li', // defaults to div if not specified
   className: 'beer', // optional, can also set multiple like 'beer sour'
   events: {
-    'click .edit':   'editBeer',
+    'click .edit': 'editBeer',
     'click .delete': 'deleteBeer',
     'click .like': 'likeBeer'
   },
@@ -37,6 +11,7 @@ Cooler.Views.Beer = Backbone.View.extend({
     var newName = prompt("New beer name:", this.model.get('name')); // prompts for new name
     if (!newName)return;  // no change if user hits cancel
     this.model.set('name', newName); // sets new name to model
+    this.model.save();
   },
   likeBeer: function(){
     var likes = this.model.get('likes');
@@ -57,14 +32,8 @@ Cooler.Views.Beer = Backbone.View.extend({
   }
 });
 
-Cooler.Collections.Beer = Backbone.Collection.extend({
-  model: Cooler.Models.Beer,
-  url: 'http://beer.fluentcloud.com/v1/beer'
-});
-
 // View for all beers (collection)
 Cooler.Views.Beers = Backbone.View.extend({
-
   initialize: function() {
     _.bindAll(this, 'render');
     // create a collection
@@ -73,7 +42,6 @@ Cooler.Views.Beers = Backbone.View.extend({
     var that = this;
     this.collection.fetch({
       success: function () {
-        console.log(that);
         that.render();
       },
       error: function(collection, xhr, options) {
@@ -81,16 +49,24 @@ Cooler.Views.Beers = Backbone.View.extend({
       }
     });
   },
-
   render: function(){
-    console.log(this.collection.toJSON());
+    console.log(this.collection);
+    /* FIXME: this is rendering two buttons... ? */
+    $(document.body).append('<button class="add">Add a Beer</button>');
     this.collection.each(function(Beer){
       beerView = new Cooler.Views.Beer({model: Beer});
       $(document.body).append(beerView.el);
     });
   },
-
-  tagName: 'ul',
+  className: 'beerIndex',
+  events: {
+    'click .add': 'addBeer'
+  },
+  addBeer: function() {
+    var newName = prompt('New beer name:');
+    this.collection.add({name: newName});
+  },
+  tagName: 'ul'
 });
 
 // creates view for collection and renders collection
