@@ -29,10 +29,21 @@ Cooler.Views.BeerView = Backbone.View.extend({
   tagName: 'li', // defaults to div if not specified
   className: 'beer', // optional, can also set multiple like 'beer sour'
   events: {
-    'click':         'alertTest',
     'click .edit':   'editBeer',
     'click .delete': 'deleteBeer',
     'click .like': 'likeBeer'
+  },
+  editBeer: function(){
+    var newName = prompt("New beer name:", this.model.get('name')); // prompts for new name
+    if (!newName)return;  // no change if user hits cancel
+    this.model.set('name', newName); // sets new name to model
+  },
+  likeBeer: function(){
+    var likes = this.model.get('likes');
+    this.model.set('likes', likes++); // sets new name to model
+  },
+  deleteBeer: function(){
+    this.model.destroy();
   },
   newTemplate: _.template($('#beerTemplate').html()),
   initialize: function() {
