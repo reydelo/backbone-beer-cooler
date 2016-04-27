@@ -25,7 +25,7 @@ Cooler.Models.Beer = Backbone.Model.extend({
 });
 
 // Beer View
-Cooler.Views.BeerView = Backbone.View.extend({
+Cooler.Views.Beer = Backbone.View.extend({
   tagName: 'li', // defaults to div if not specified
   className: 'beer', // optional, can also set multiple like 'beer sour'
   events: {
@@ -57,35 +57,42 @@ Cooler.Views.BeerView = Backbone.View.extend({
   }
 });
 
-Cooler.Collections.BeerCollection = Backbone.Collection.extend({
-  model: Cooler.Models.Beer
+Cooler.Collections.Beer = Backbone.Collection.extend({
+  model: Cooler.Models.Beer,
+  url: 'http://beer.fluentcloud.com/v1/beer'
 });
 
-// adding individual models to collection
-var sour = new Cooler.Models.Beer();
-
-
-// adding multiple models to collection (this will override the above Tutorial.Collections.Animal)
-var beerCollection = new Cooler.Collections.BeerCollection([
-  {name: 'Apricot Vielle', likes: 975},
-  {name: 'Collete IPA', likes: 342},
-  {name: 'Funkwerks Raspberry IPA', likes: 834}
-]);
-
 // View for all beers (collection)
-Cooler.Views.BeersView = Backbone.View.extend({ // calling this BeersView to distinguish as the view for the collection
-  tagName: 'ul',
-  initialize: function(){
-    this.collection;
+Cooler.Views.Beers = Backbone.View.extend({
+
+  initialize: function() {
+    _.bindAll(this, 'render');
+    // create a collection
+    this.collection = new Cooler.Collections.Beer;
+    // Fetch the collection and call render() method
+    var that = this;
+    this.collection.fetch({
+      success: function () {
+        console.log(that);
+        that.render();
+      },
+      error: function(collection, xhr, options) {
+        console.log(collection, xhr, options);
+      }
+    });
   },
+
   render: function(){
+    console.log(this.collection.toJSON());
     this.collection.each(function(Beer){
-      beerView = new Cooler.Views.BeerView({model: Beer});
+      beerView = new Cooler.Views.Beer({model: Beer});
       $(document.body).append(beerView.el);
     });
-  }
+  },
+
+  tagName: 'ul',
 });
 
 // creates view for collection and renders collection
-var beersView = new Cooler.Views.BeersView({collection: beerCollection});
+var beersView = new Cooler.Views.Beers({el: $('body')});
 beersView.render();
