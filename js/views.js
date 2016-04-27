@@ -10,14 +10,34 @@ Cooler.Views.Beer = Backbone.View.extend({
   editBeer: function(){
     var newName = prompt("New beer name:", this.model.get('name')); // prompts for new name
     if (!newName)return;  // no change if user hits cancel
-    this.model.set('name', newName); // sets new name to model
-    this.model.save();
+    this.model.save('name', newName, {
+      error: function(model, response, options){
+        console.log('ERROR', model, response, options);
+      },
+      success: function(model, response, options){
+        console.log('SUCCESS', model, response, options);
+      }
+    });
+    this.render();
+    console.log(this);
+    console.log(this.model);
+    console.log(this.model.collection);
   },
   likeBeer: function(){
     var likes = this.model.get('likes');
-    this.model.set('likes', likes++); // sets new name to model
+    likes++;
+    this.model.save('likes', likes, {
+      success: function(model, response, options) {
+        console.log('SUCCESS', model, response, options);
+      },
+      error: function(model, response, options){
+        console.log('ERROR', model, response, options);
+      }
+    });
+    this.render();
   },
   deleteBeer: function(){
+    this.remove();
     this.model.destroy();
   },
   newTemplate: _.template($('#beerTemplate').html()),
@@ -64,7 +84,11 @@ Cooler.Views.Beers = Backbone.View.extend({
   },
   addBeer: function() {
     var newName = prompt('New beer name:');
+    if (!newName)return;  // no change if user hits cancel
+    console.log(this.collection);
     this.collection.add({name: newName});
+    this.render();
+    console.log(this.collection);
   },
   tagName: 'ul'
 });
